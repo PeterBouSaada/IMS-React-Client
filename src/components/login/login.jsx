@@ -7,7 +7,11 @@ const Login = () => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [loginError, setLoginError] = useState(null);
-	const postRequest = usePost();
+	
+	const abortController = new AbortController();
+	
+	const postRequest = usePost(abortController);
+	
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -20,27 +24,29 @@ const Login = () => {
 	const handleLogin = (e) => 
 	{
 		e.preventDefault();
+
 		const body = {
 			username: username,
-			password: password
+			password: password,
 		}
-
     	const headers = {'Content-Type': 'application/json'};
-		
 		const onSuccess = (data) => 
 		{
 			localStorage.setItem("token", "Bearer " + data.token);
 			navigate('/', {replace: true});
 		}
-		
 		const onFailure = (error) =>
 		{
 			if(error === 401)
 				setLoginError("Invalid username and password combination.");
 		}
-
 		postRequest("http://localhost:5000/API/user/Authenticate", onSuccess, onFailure,{headers: headers, body: body});
+
 	}
+
+	useEffect(() => {
+		return abortController.abort();
+	}, []);
 
 	return (
 		<section className="h-100">
