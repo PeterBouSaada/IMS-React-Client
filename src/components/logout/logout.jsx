@@ -1,13 +1,13 @@
 import React, {useEffect} from 'react'
 import { useNavigate } from "react-router-dom";
-
+import Cookies from 'js-cookie';
 
 const Logout = () => {
 	const navigate = useNavigate();
 
-	if(localStorage.getItem("token") != null)
+	if(Cookies.get("token") !== undefined)
 	{
-		localStorage.removeItem("token");
+		Cookies.remove("token");
 	}
 
 	useEffect(() => 

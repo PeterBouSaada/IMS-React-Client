@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePost } from "../../hooks/HTTPRequests";
+import Cookies from 'js-cookie';
+import Configuration from '../../Config.json';
 import "./login.css";
 
 const Login = () => {
@@ -9,14 +11,14 @@ const Login = () => {
 	const [loginError, setLoginError] = useState(null);
 	
 	const abortController = new AbortController();
-	
 	const postRequest = usePost(abortController);
-	
 	const navigate = useNavigate();
+	const baseURL = Configuration.API_URL;
 
 	useEffect(() => {
-		if(localStorage.getItem("token") !== null)
+		if(Cookies.get("token") !== undefined)
 		{
+			console.log(Cookies.get("token") + "is set");
 			navigate("/", {replace: true});
 		}
 	}, []);
@@ -29,18 +31,22 @@ const Login = () => {
 			username: username,
 			password: password,
 		}
+
     	const headers = {'Content-Type': 'application/json'};
+		
 		const onSuccess = (data) => 
 		{
-			localStorage.setItem("token", "Bearer " + data.token);
+			Cookies.set("token", "Bearer " + data.token, {expires: 1});
 			navigate('/', {replace: true});
 		}
+		
 		const onFailure = (error) =>
 		{
 			if(error === 401)
 				setLoginError("Invalid username and password combination.");
 		}
-		postRequest("http://localhost:5000/API/user/Authenticate", onSuccess, onFailure,{headers: headers, body: body});
+		
+		postRequest(baseURL + "users/authenticate", onSuccess, onFailure,{headers: headers, body: body});
 
 	}
 
